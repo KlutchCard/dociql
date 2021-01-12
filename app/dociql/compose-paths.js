@@ -1,5 +1,7 @@
 const generateExample = require("./generate-example")
 const convertTypeToSchema = require("./convert-type")
+const {
+    GraphQLObjectType} = require("graphql")
 
 function getExpandField(expandNotation) {
     const subExpandIndex = expandNotation.indexOf("(")
@@ -14,8 +16,8 @@ function getExpandField(expandNotation) {
     return result;
 }
 
-module.exports = function (domains, graphQLSchema) {
-
+module.exports = function (domains, graphQLSchema) {    
+    
     function composePath(tag, usecase) {
         const result = {}
 
@@ -28,10 +30,18 @@ module.exports = function (domains, graphQLSchema) {
             graphQLSchema.getQueryType() :
             graphQLSchema.getMutationType()
 
-        var target = typeDict;
+        var target = typeDict;        
+        var targetTree = []        
         queryTokens.forEach((token, i) => {
-            if (i != 0)
-                target = target.getFields()[token]
+            
+            if (i == 0) return;
+
+            if (target instanceof GraphQLObjectType) {
+                target =target.getFields()[token]
+            } else {
+                target =target.type.getFields()[token]
+            }            
+            targetTree.push(target)
         });        
 
         const expandFields = usecase.expand ?
@@ -43,7 +53,7 @@ module.exports = function (domains, graphQLSchema) {
             select: selectFields
         })
 
-        var examples = generateExample(queryTokens[0].toLowerCase(), target, expandFields)
+        var examples = generateExample(queryTokens[0].toLowerCase(), target, expandFields, targetTree)
 
         const responseSchema = convertTypeToSchema(target.type);
         responseSchema.example = examples.schema;

@@ -127,19 +127,21 @@ function generateExampleSchema(name, type, expandGraph, depth) {
     }
 }
 
-function generateQuery(parentType, field, expandGraph) {
+function generateQuery(parentType, field, expandGraph, fieldTree) {
 
     const schema = generateExampleSchema(field.name, field.type, expandGraph, 1)
     const queryResult = generateQueryInternal(
         field,
         expandGraph,
         [],
-        1);
+        1);    
+    const eg = fieldTree.map(f => ({field: f.name}))        
+    const deepTreeQuery = generateQueryInternal(fieldTree[0], eg, [], 1)
     const argStr = queryResult.args
         .filter((item, pos) => queryResult.args.indexOf(item) === pos)
         .map(arg => `$${arg.name}: ${arg.type}`)
         .join(', ');
-    var cleanedQuery = queryResult.query.replace(/ : [\w!\[\]]+/g, "");
+    var cleanedQuery = deepTreeQuery.query.replace(/ : [\w!\[\]]+/g, "");
 
     var query = `${parentType} ${field.name}${argStr ? `(${argStr})` : ''}{\n${cleanedQuery}}`
 
