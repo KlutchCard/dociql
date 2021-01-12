@@ -12,9 +12,9 @@
             "program": "${workspaceFolder}/bin/dociql.js",
             "protocol": "inspector",
             "args": [                
-                "-l", 
-                "eevee.png",
-                "config.yml"
+                "c:\\workspace\\alloy\\developer-portal\\apireference\\config.yml",
+                "--target-dir",
+                "c:\\workspace\\alloy\\developer-portal\\apireference\\public"
             ]
         }
     ]

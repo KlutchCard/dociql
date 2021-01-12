@@ -1,20 +1,9 @@
+"use strict";
 const generateExample = require("./generate-example")
 const convertTypeToSchema = require("./convert-type")
 const {
     GraphQLObjectType} = require("graphql")
 
-function getExpandField(expandNotation) {
-    const subExpandIndex = expandNotation.indexOf("(")
-
-    var result = {
-        field: subExpandIndex == -1 ? expandNotation : expandNotation.substring(0, subExpandIndex),
-        select: subExpandIndex == -1 ?
-            null :
-            expandNotation.substring(subExpandIndex + 1, expandNotation.length - 1).split(" ")
-    }
-
-    return result;
-}
 
 module.exports = function (domains, graphQLSchema) {    
     
@@ -43,10 +32,21 @@ module.exports = function (domains, graphQLSchema) {
             }            
             targetTree.push(target)
         });        
+        var expandFields = []
+        if (usecase.expand) {
+            expandFields = usecase.expand.match(/\w+\([\w, ]+\)/gm).map(match =>  {
+                const expandIndex = match.indexOf("(")
+                return {
+                    field: match.substring(0, expandIndex).trim(),
+                    select: match.substring(expandIndex+1, match.indexOf(")"))    
+                }
+            })
+            expandFields = expandFields.concat(usecase.expand.match(/(?![^\(]*\))\w+/g).map(match => ({
+                field: match,
+                select: null
+            })))            
+        }
 
-        const expandFields = usecase.expand ?
-            usecase.expand.split(",").map(getExpandField) :
-            []; // [] - expand nothing
         const selectFields = usecase.select ? usecase.select.split(" ") : null; // null = select all                
         expandFields.push({
             field: target.name,

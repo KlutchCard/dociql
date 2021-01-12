@@ -135,7 +135,7 @@ function generateQuery(parentType, field, expandGraph, fieldTree) {
         expandGraph,
         [],
         1);    
-    const eg = fieldTree.map(f => ({field: f.name}))        
+    const eg = fieldTree.map(f => ({field: f.name})).concat(expandGraph) 
     const deepTreeQuery = generateQueryInternal(fieldTree[0], eg, [], 1)
     const argStr = queryResult.args
         .filter((item, pos) => queryResult.args.indexOf(item) === pos)
