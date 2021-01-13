@@ -34,13 +34,13 @@ module.exports = function (domains, graphQLSchema) {
         });        
         var expandFields = []
         if (usecase.expand) {
-            expandFields = usecase.expand.match(/\w+\([\w, ]+\)/gm).map(match =>  {
+            expandFields = (usecase.expand.match(/\w+\([\w, ]+\)/gm) || [usecase.expand]).map(match =>  {
                 const expandIndex = match.indexOf("(")
                 return {
                     field: match.substring(0, expandIndex).trim(),
                     select: match.substring(expandIndex+1, match.indexOf(")"))    
                 }
-            })
+            }) 
             expandFields = expandFields.concat(usecase.expand.match(/(?![^\(]*\))\w+/g).map(match => ({
                 field: match,
                 select: null
